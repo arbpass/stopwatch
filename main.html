@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title class="time-display" id="swDisplayTitle">00:00:00 <h3>Time<h3/>></title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #2e2e2e;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .light-mode {
+      background: #f4f4f4;
+      color: #243b55;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      font-size: 2.5rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: inherit;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .tab {
+      padding: 1.2rem 3rem;
+      font-size: 1.8rem;
+      border: 2px solid white;
+      border-radius: 12px;
+      background-color: transparent;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .light-mode .tab {
+      border-color: #243b55;
+    }
+
+    .tab.active {
+      background-color: white;
+      color: #243b55;
+      font-weight: bold;
+    }
+
+    .panel {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 3rem;
+    }
+
+    .panel.active {
+      display: flex;
+    }
+
+    .time-display {
+      font-size: 10rem;
+      letter-spacing: 6px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 1.5rem 3rem;
+      font-size: 1.8rem;
+      border: none;
+      border-radius: 12px;
+      background-color: #ffffff;
+      color: #243b55;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #ddd;
+    }
+
+    input[type="number"] {
+      width: 6rem;
+      text-align: center;
+      font-size: 2rem;
+      border-radius: 6px;
+      padding: 0.6rem;
+      border: none;
+    }
+
+    .laps {
+      margin-top: 2rem;
+      max-height: 200px;
+      overflow-y: auto;
+      width: 100%;
+      max-width: 400px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .laps ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .laps li {
+      font-size: 1.5rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    #clock {
+      background-color: white;
+      color: #243b55;
+      font-weight: bolder;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+  <button id="clock" style="font-size: 40px; font-family: monospace;">Time</button>
+  <br></br>
+  <div class="tabs">
+    <button class="tab active" onclick="showPanel('stopwatch')">Stopwatch</button>
+    <button class="tab" onclick="showPanel('timer')">Timer</button>
+  </div>
+
+  <div id="stopwatch" class="panel active">
+    <div class="time-display" id="swDisplay">00:00:00</div>
+    <div class="controls">
+      <button onclick="startStopwatch()">Start</button>
+      <button onclick="stopStopwatch()">Stop</button>
+      <button onclick="resetStopwatch()">Reset</button>
+      <button onclick="lapStopwatch()">Lap</button>
+    </div>
+    <div class="laps">
+      <ul id="lapsList"></ul>
+    </div>
+  </div>
+
+  <div id="timer" class="panel">
+    <div>
+      <input type="number" id="min" min="0" max="59" placeholder="MM"> :
+      <input type="number" id="sec" min="0" max="59" placeholder="SS">
+    </div>
+    <div class="time-display" id="timerDisplay">00:00</div>
+    <div class="controls">
+      <button onclick="startTimer()">Start</button>
+      <button onclick="stopTimer()">Stop</button>
+      <button onclick="resetTimer()">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.panel');
+    const themeToggle = document.querySelector('.theme-toggle');
+    const body = document.body;
+
+    function showPanel(id) {
+      tabs.forEach(tab => tab.classList.remove('active'));
+      panels.forEach(panel => panel.classList.remove('active'));
+      document.querySelector(`.tab[onclick*="${id}"]`).classList.add('active');
+      document.getElementById(id).classList.add('active');
+    }
+
+    function toggleTheme() {
+      body.classList.toggle('light-mode');
+      if(body.classList == 'light-mode') document.getElementById('swDisplay').style.color = '#243b55';
+      if(body.classList != 'light-mode') document.getElementById('swDisplay').style.color = '#ffffff';
+      themeToggle.textContent = body.classList.contains('light-mode') ? '🌞' : '🌙';
+    }
+
+    // Stopwatch
+    let swInterval, swSeconds = 0;
+    let lapCount = 0;
+    function updateStopwatch() {
+      const hrs = String(Math.floor(swSeconds / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((swSeconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(swSeconds % 60).padStart(2, '0');
+      document.getElementById('swDisplay').textContent = `${hrs}:${mins}:${secs}`;
+      document.getElementById('swDisplayTitle').textContent = `${hrs}:${mins}:${secs}`;
+    }
+    function startStopwatch() {
+      document.getElementById('swDisplay').style.color = '#afff63';
+      if (!swInterval) swInterval = setInterval(() => {
+        swSeconds++;
+        updateStopwatch();
+      }, 1000);
+    }
+    function stopStopwatch() {
+      if(body.classList != 'light-mode') document.getElementById('swDisplay').style.color = '#ffffff';
+      if(body.classList == 'light-mode') document.getElementById('swDisplay').style.color = '#243b55';
+      clearInterval(swInterval);
+      swInterval = null;
+    }
+    function resetStopwatch() {
+      stopStopwatch();
+      swSeconds = 0;
+      lapCount = 0;
+      updateStopwatch();
+      document.getElementById('lapsList').innerHTML = '';
+    }
+    function lapStopwatch() {
+      const display = document.getElementById('swDisplay').textContent;
+      const lapItem = document.createElement('li');
+      lapItem.textContent = `Lap ${++lapCount}: ${display}`;
+      document.getElementById('lapsList').prepend(lapItem);
+    }
+
+    // Timer
+    let timerInterval, timeLeft = 0;
+    function updateTimer() {
+      const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+      const secs = String(timeLeft % 60).padStart(2, '0');
+      document.getElementById('timerDisplay').textContent = `${mins}:${secs}`;
+    }
+    function startTimer() {
+      document.getElementById('timerDisplay').style.color = '#fc877e';
+      if (!timerInterval) {
+        const minInput = document.getElementById('min').value || 0;
+        const secInput = document.getElementById('sec').value || 0;
+        timeLeft = parseInt(minInput) * 60 + parseInt(secInput);
+        if (timeLeft <= 0) return;
+        updateTimer();
+        timerInterval = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            updateTimer();
+          } else {
+            stopTimer();
+            alert("Time's up!");
+          }
+        }, 1000);
+      }
+    }
+    function stopTimer() {
+      document.getElementById('timerDisplay').style.color = '#ffffff';
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    function resetTimer() {
+      stopTimer();
+      timeLeft = 0;
+      updateTimer();
+      document.getElementById('min').value = '';
+      document.getElementById('sec').value = '';
+    }
+
+    updateStopwatch();
+    updateTimer();
+
+
+    //clock
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+
+      hours = hours % 12;
+      hours = hours ? hours : 12; // 0 becomes 12
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+
+      const timeString = `${hours}:${minutes} ${ampm}`;
+      document.getElementById('clock').textContent = timeString;
+    }
+
+    setInterval(updateClock, 1000 * 10); // update every 10 seconds (not needed every second)
+    updateClock();
+  </script>
+</body>
+</html>
