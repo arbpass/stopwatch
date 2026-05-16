@@ -160,23 +160,42 @@
       display: flex; align-items: center; justify-content: center;
     }
     .ring-svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
-    .ring-track { fill: none; stroke: var(--surface2); stroke-width: 6; }
+    .ring-track { fill: none; stroke: rgba(255,255,255,0.07); stroke-width: 6; }
     .ring-progress {
       fill: none;
-      stroke: var(--accent);
+      stroke: rgba(124,106,245,0.35);
       stroke-width: 6;
       stroke-linecap: round;
       stroke-dasharray: 565.5;
       stroke-dashoffset: 565.5;
       transition: stroke-dashoffset 0.5s ease, stroke 0.4s;
     }
-    .ring-progress.running { stroke: var(--green); }
-    .ring-progress.timer-running { stroke: var(--amber); }
-    .ring-progress.timer-done { stroke: var(--red); }
+    .ring-progress.running { stroke: rgba(74,222,128,0.4); }
+    .ring-progress.timer-running { stroke: rgba(251,191,36,0.4); }
+    .ring-progress.timer-done { stroke: rgba(248,113,113,0.45); }
+    .light .ring-track { stroke: rgba(0,0,0,0.08); }
+    .light .ring-progress { stroke: rgba(91,70,232,0.3); }
+    .light .ring-progress.running { stroke: rgba(22,163,74,0.35); }
+    .light .ring-progress.timer-running { stroke: rgba(217,119,6,0.35); }
+    .light .ring-progress.timer-done { stroke: rgba(220,38,38,0.4); }
 
     .time-inner {
       text-align: center;
       z-index: 1;
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 50%;
+      width: 158px; height: 158px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    .light .time-inner {
+      background: rgba(255,255,255,0.45);
+      border-color: rgba(255,255,255,0.6);
+      box-shadow: 0 4px 24px rgba(91,70,232,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
     }
     .time-display {
       font-family: var(--mono);
@@ -343,10 +362,11 @@
 
     /* ─── Responsive ─── */
     @media (max-width: 480px) {
-      .time-display { font-size: 2rem; }
+      .time-display { font-size: 1.6rem; }
       .ring-wrap { width: 180px; height: 180px; }
       .ring-svg { width: 180px; height: 180px; }
       .ring-track, .ring-progress { stroke-width: 5; }
+      .time-inner { width: 128px; height: 128px; }
       .btn { padding: 0.6rem 1rem; font-size: 0.8rem; }
       .card { padding: 1.75rem 1.25rem 1.5rem; }
     }
