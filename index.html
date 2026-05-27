@@ -127,7 +127,8 @@
   </div>
 
   <script>
-    let running = false, startTime = 0, elapsed = 0, raf = null;
+    let running = false, startTime = 0, elapsed = 0;
+    let interval = null;
 
     const timeEl       = document.getElementById('time');
     const startStopBtn = document.getElementById('startStop');
@@ -143,12 +144,11 @@
       return `${pad(h)}:${pad(m)}:${pad(s)}`;
     }
 
-    function tick() {
+    function update() {
       elapsed = Date.now() - startTime;
       const t = fmt(elapsed);
       timeEl.textContent = t;
       document.title     = t + ' — Stopwatch';
-      raf = requestAnimationFrame(tick);
     }
 
     startStopBtn.addEventListener('click', () => {
@@ -157,10 +157,11 @@
         running   = true;
         startStopBtn.textContent = 'Pause';
         statusDot.classList.add('running');
-        tick();
+        interval = setInterval(update, 500);
+        update();
       } else {
         running = false;
-        cancelAnimationFrame(raf);
+        clearInterval(interval);
         startStopBtn.textContent = 'Resume';
         statusDot.classList.remove('running');
       }
@@ -168,7 +169,7 @@
 
     resetBtn.addEventListener('click', () => {
       running = false;
-      cancelAnimationFrame(raf);
+      clearInterval(interval);
       elapsed = 0;
       timeEl.textContent       = '00:00:00';
       startStopBtn.textContent = 'Start';
